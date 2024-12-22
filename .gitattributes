@@ -1,1 +1,2 @@
-*.html linguistic-vendored
+* linguistic-vendored
+*.py linguistic-vendored=false
