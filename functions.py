@@ -4,7 +4,7 @@ import os
 import re
 import yfinance as yf
 import matplotlib.pyplot as plt 
-import numpy as np 
+
 
 def scraper(soup):
     table = soup.find("table", class_="histo-results")
@@ -41,11 +41,25 @@ def brav3():
     BRAV3 = pd.concat([inicial_fusion, final_fusion], ignore_index=True)
     return BRAV3
 
-def variables_plot(stocks):
+def likelihood_array(len_df: int, final_list: list, stocks: list, stock_model):
+    likelihood_array = [stock_model.decode(stocks[0].iloc[0:index])[0] for index in range(1, len_df+1)]
+    final_list.append(likelihood_array)
+    return final_list
+
+def variables_plot(stocks_row):
     figure = plt.figure(figsize= (10, 10), layout = "constrained")
     axes = figure.add_subplot(2, 1, 1)
-    axes.plot(stocks)
+    axes.plot(stocks_row)
     axes.grid(True)
-    axes.set_xlabel("Datetime")
+    axes.set_xlabel("Variables")
     axes.set_ylabel("Prices(R$)")
     figure.show()
+
+
+
+
+
+
+
+
+
