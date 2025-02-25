@@ -5,6 +5,7 @@ import re
 import yfinance as yf
 import matplotlib.pyplot as plt 
 import numpy as np
+from hmmlearn import hmm
 
 
 def scraper(soup):
@@ -37,31 +38,15 @@ def brav3():
     BRAV3 = pd.concat([inicial_f, final_fusion], ignore_index=True)
     return BRAV3
 
-def opmization_data(stocks):
-    stocks["Returns"] = (stocks["Adj Close"] - stocks["Open"])/stocks["Open"]
 
-def likelihood_array(len_df: int, initial_element: list, stocks: list, stock_model, window_size: int): 
-    likelihood_array = [stock_model.score(stocks[0].iloc[index:index+window_size]) for index in range(1, len_df + 1 - window_size)]
-    return initial_element + likelihood_array
+def past_index(likelihood_array: list, z):
+    match_index = np.argmin([np.abs(x - z) for x in likelihood_array])
+    return match_index
 
-def find_state_pattern(sequence, pattern, margin=0):
-    matches = []
-    for i in range(0, len(sequence) - len(pattern) + 1):
-        if all(abs(sequence[i+j] - pattern[j]) <= margin for j in range(len(pattern))):
-            matches.append(i)
-    return matches
+def likelihood_array(len_df: int, training_data: list, stock_model, window_size: int): 
+    likelihood_array = [stock_model.score(training_data[index:index+window_size,:]) for index in range(1, len_df + 1 - (2*window_size))]
+    return likelihood_array
 
-def find_most_representative_index(current_window, candidate_indices, stocks, window_size):
-    valid_indices = [idx for idx in candidate_indices if idx < len(stocks[0]) - (window_size*2)]
-    distances = []
-    for idx in valid_indices:
-        past_window = stocks[0].iloc[idx:idx+window_size].to_numpy()
-        distance = np.linalg.norm(current_window - past_window)
-        distances.append(distance)
-    
-    # Find index of the most similar past window
-    best_idx = valid_indices[np.argmin(distances)]
-    return best_idx
 
 def variables_plot(stocks_row1, stocks_row2):
     figure = plt.figure(figsize= (10, 10), layout = "constrained")
@@ -75,7 +60,6 @@ def variables_plot(stocks_row1, stocks_row2):
     axes.set_xlabel("Variables")
     axes.set_ylabel("Prices(R$)")
     figure.show()
-
 
 
 
